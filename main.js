@@ -1,31 +1,42 @@
 var canvas;
 var ctx;
-var x = 75;
-var y = 50;
+var x = 0;
+var y = 0;
+var lastx = 0;
+var lasty = 0;
 var WIDTH = 800;
 var HEIGHT = 600;
-var dragok = false;
-var Atom = (function () {
-    function Atom(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    Atom.prototype.render = function (ctx) {
-        ctx.beginPath();
-        ctx.rect(this.x, this.y, 10, 10);
-        ctx.closePath();
-        ctx.fill();
-    };
-    return Atom;
-}());
+var dragging = false;
+var pages = [];
+var currentPage;
 var Point = (function () {
-    function Point(x, y, start) {
+    function Point(x, y) {
         this.x = x;
         this.y = y;
-        this.start = start;
     }
     return Point;
 }());
+var Line = (function () {
+    function Line(p1, p2) {
+        this.p1 = p1;
+        this.p2 = p2;
+    }
+    return Line;
+}());
+var Page = (function () {
+    function Page(lines) {
+        this.lines = lines;
+    }
+    return Page;
+}());
+function renderLines(ctx, lines) {
+    ctx.beginPath();
+    lines.forEach(function (l) {
+        ctx.moveTo(l.p1.x, l.p1.y);
+        ctx.lineTo(l.p2.x, l.p2.y);
+    });
+    ctx.stroke();
+}
 function renderPoints(ctx, points) {
     ctx.beginPath();
     var lastx = 0;
@@ -35,17 +46,13 @@ function renderPoints(ctx, points) {
             ctx.moveTo(p.x, p.y);
         }
         else {
-            ctx.lineTo(lastx, lasty, p.x, p.y);
+            ctx.lineTo(lastx, lasty, p.x + Math.random() * 4.0 - 2.0, p.y + Math.random() * 4.0 - 2.0);
         }
         lastx = p.x;
         lasty = p.y;
     });
     ctx.stroke();
 }
-var atoms = [];
-//var a = new Atom(20, 20);
-//atoms.push(a);
-var points = [];
 function rect(x, y, w, h) {
     ctx.beginPath();
     ctx.rect(x, y, w, h);
@@ -55,38 +62,102 @@ function rect(x, y, w, h) {
 function clear() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 }
+function clearAll() {
+    currentPage.lines = [];
+    clear();
+    draw();
+}
 function draw() {
     clear();
     ctx.fillStyle = "#FAF7F8";
     rect(0, 0, WIDTH, HEIGHT);
-    atoms.forEach(function (a) {
-        console.log("test");
-        a.render(ctx);
-    });
-    renderPoints(ctx, points);
+    renderLines(ctx, currentPage.lines);
 }
 function mouseMoved(e) {
-    if (dragok) {
+    if (dragging) {
         x = e.pageX - canvas.offsetLeft;
         y = e.pageY - canvas.offsetTop;
-        var p = new Point(x, y, 0);
-        points.push(p);
+        //var p = new Point(x, y, 0);
+        //points.push(p);
+        var l = new Line(new Point(lastx, lasty), new Point(x, y));
+        currentPage.lines.push(l);
+        lastx = x;
+        lasty = y;
     }
     draw();
 }
 function mouseDown(e) {
     x = e.pageX - canvas.offsetLeft;
     y = e.pageY - canvas.offsetTop;
-    dragok = true;
+    lastx = x;
+    lasty = y;
+    dragging = true;
     canvas.onmousemove = mouseMoved;
-    points.push(new Point(x, y, 1));
 }
 function mouseUp() {
-    dragok = false;
+    dragging = false;
     canvas.onmousemove = null;
+}
+function addPage() {
+    var l = [];
+    var p = new Page(l);
+    pages.push(p);
+    updatePageElements();
+    return p;
+}
+function loadPage(event) {
+    var text = event.srcElement.innerText;
+    console.log(text);
+    clear();
+    var index = Number(text.substring(1)) - 1;
+    console.log(index);
+    currentPage = pages[index];
+    draw();
+}
+function updatePageElements() {
+    document.getElementById("pages").innerHTML = "";
+    var i = 1;
+    pages.forEach(function (p) {
+        createButton("pages", "p" + i, loadPage);
+        i += 1;
+    });
+}
+function createButton(parentElement, text, callback) {
+    var btn = document.createElement("BUTTON");
+    var t = document.createTextNode(text);
+    btn.appendChild(t);
+    btn.onclick = callback;
+    document.getElementById(parentElement).appendChild(btn);
+}
+var ls;
+var encodedPages;
+if (typeof (Storage) !== "undefined") {
+    // Code for localStorage/sessionStorage.
+    ls = localStorage;
+    createButton("controls", "save", function (event) {
+        encodedPages = JSON.stringify(pages);
+        ls.setItem("pages", encodedPages);
+    });
+    pages = JSON.parse(ls.getItem("pages"));
+    if (!pages) {
+        pages = [];
+    }
+    else {
+        updatePageElements();
+    }
+}
+else {
+}
+if (pages.length == 0) {
+    currentPage = addPage();
+}
+else {
+    currentPage = pages[0];
 }
 canvas = document.getElementById("canvas");
 ctx = canvas.getContext("2d");
 draw();
 canvas.onmousedown = mouseDown;
 canvas.onmouseup = mouseUp;
+document.getElementById("buttonClear").onclick = clearAll;
+document.getElementById("buttonAddPage").onclick = addPage;
