@@ -1,5 +1,7 @@
 var canvas;
 var ctx;
+canvas = document.getElementById("canvas");
+ctx = canvas.getContext("2d");
 var x = 0;
 var y = 0;
 var lastx = 0;
@@ -9,6 +11,8 @@ var HEIGHT = 600;
 var dragging = false;
 var pages = [];
 var currentPage;
+var textArea;
+textArea = document.getElementById("pageDescription");
 var Point = (function () {
     function Point(x, y) {
         this.x = x;
@@ -64,7 +68,6 @@ function clear() {
 }
 function clearAll() {
     currentPage.lines = [];
-    clear();
     draw();
 }
 function draw() {
@@ -129,24 +132,31 @@ function createButton(parentElement, text, callback) {
     btn.onclick = callback;
     document.getElementById(parentElement).appendChild(btn);
 }
-var ls;
-var encodedPages;
+function loadPages(desc) {
+    pages = JSON.parse(desc);
+    updatePageElements();
+    if (pages.length != 0) {
+        currentPage = pages[0];
+    }
+    draw();
+}
+function loadPagesFromTextArea() {
+    loadPages(textArea.value);
+}
 if (typeof (Storage) !== "undefined") {
     // Code for localStorage/sessionStorage.
-    ls = localStorage;
+    var ls = localStorage;
     createButton("controls", "save", function (event) {
-        encodedPages = JSON.stringify(pages);
+        var encodedPages = JSON.stringify(pages);
         ls.setItem("pages", encodedPages);
+        textArea.value = encodedPages;
     });
-    pages = JSON.parse(ls.getItem("pages"));
-    if (!pages) {
-        pages = [];
-    }
-    else {
-        updatePageElements();
-    }
+    loadPages(ls.getItem("pages"));
 }
 else {
+}
+if (!pages) {
+    pages = [];
 }
 if (pages.length == 0) {
     currentPage = addPage();
@@ -154,10 +164,9 @@ if (pages.length == 0) {
 else {
     currentPage = pages[0];
 }
-canvas = document.getElementById("canvas");
-ctx = canvas.getContext("2d");
 draw();
 canvas.onmousedown = mouseDown;
 canvas.onmouseup = mouseUp;
 document.getElementById("buttonClear").onclick = clearAll;
 document.getElementById("buttonAddPage").onclick = addPage;
+document.getElementById("buttonLoad").onclick = loadPagesFromTextArea;
