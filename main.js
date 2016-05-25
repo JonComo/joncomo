@@ -8,7 +8,7 @@ function update_canvas_size(event) {
     canvas.height = window.innerHeight;
     draw();
 }
-update_canvas_size();
+update_canvas_size(null);
 window.onresize = update_canvas_size;
 // draw
 function draw() {

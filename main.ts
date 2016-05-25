@@ -11,7 +11,7 @@ function update_canvas_size(event) {
     draw();
 }
 
-update_canvas_size();
+update_canvas_size(null);
 window.onresize = update_canvas_size;
 
 // draw
