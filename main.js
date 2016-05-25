@@ -1,23 +1,35 @@
-var canvas = document.getElementById("canvas");
-
-// Set width and height
-canvas.width = Math.min(4000, window.innerWidth);
-canvas.height = Math.min(4000, window.innerHeight);
-
-var ctx = canvas.getContext("2d");
-
 // Disable scrolling
 document.ontouchmove = function(e) { e.preventDefault() };
 
-// draw a circle
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
 
-ctx.fillStyle = "#DDDDDD";
-ctx.strokeStyle = "#000000";
-ctx.lineWidth = 4.0;
+// Set width and height
+function update_canvas_size(event) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    draw();
+}
 
-ctx.rect(0, 0, canvas.width, canvas.height);
-ctx.fill();
+update_canvas_size();
+window.onresize = update_canvas_size;
 
-ctx.beginPath();
-ctx.arc(100,75,50,0,2*Math.PI);
-ctx.stroke();
+// draw
+function draw() {
+    ctx.fillStyle = "#DDDDDD";
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 4.0;
+
+    ctx.rect(0, 0, canvas.width, canvas.height);
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.arc(100,100,50,0,2*Math.PI);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.rect(10, 10, canvas.width-20, canvas.height-20);
+    ctx.stroke();
+}
+
+draw();
