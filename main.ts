@@ -1,7 +1,7 @@
 // Disable scrolling
 document.ontouchmove = function(e) { e.preventDefault() };
 
-var canvas = document.getElementById("canvas");
+var canvas = <HTMLCanvasElement>document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
 // Set width and height
