@@ -16,7 +16,7 @@ window.onresize = update_canvas_size;
 
 // draw
 function draw() {
-    ctx.fillStyle = "#DDDDDD";
+    ctx.fillStyle = "#EEEEEE";
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 4.0;
 
