@@ -6,9 +6,18 @@ canvas.height = Math.min(4000, window.innerHeight);
 
 var ctx = canvas.getContext("2d");
 
-ctx.fillStyle = "#990000";
+// Disable scrolling
+document.ontouchmove = function(e) { e.preventDefault() };
+
+// draw a circle
+
+ctx.fillStyle = "#DDDDDD";
+ctx.strokeStyle = "#000000";
+ctx.lineWidth = 4.0;
+
 ctx.rect(0, 0, canvas.width, canvas.height);
 ctx.fill();
 
-// Disable scrolling
-document.ontouchmove = function(e) { e.preventDefault() };
+ctx.beginPath();
+ctx.arc(100,75,50,0,2*Math.PI);
+ctx.stroke();
